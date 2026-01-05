@@ -14,7 +14,7 @@
       </div>
       <div>
         <div class="brand-title">Gráfica EPA</div>
-        <div class="badge"><span class="pulse"></span> Serviço on-line</div>
+        <div class="badge"><span class="pulse"></span>on-line</div>
       </div>
     </div>
     <button class="user-greeting" type="button" data-modal-open="modal-login" aria-label="Usuario logado">
@@ -105,7 +105,7 @@
         <div>
           <div class="modal__eyebrow">Autoatendimento</div>
           <h2 id="flow-title">Monte seu pedido</h2>
-          <p class="modal__progress" id="flow-progress">Etapa 1 de 8</p>
+          <p class="modal__progress" id="flow-progress">Etapa 1 de 9</p>
           <div class="progress">
             <span id="flow-progress-bar"></span>
           </div>
@@ -114,8 +114,18 @@
       </div>
 
       <div class="modal__body">
-        <div class="step-panel is-active" data-step="1">
-          <strong>1. Escolha o produto</strong>
+        <div class="step-panel is-active" data-step="0">
+          <strong>1. Tem a arte pronta?</strong>
+          <p class="muted">Assim definimos o proximo passo.</p>
+          <div class="option-grid">
+            <button class="option" type="button" data-select="artReady" data-value="Sim, enviar arte">Sim, enviar arte</button>
+            <button class="option" type="button" data-select="artReady" data-value="Nao, solicitar design">Não, solicitar design</button>
+          </div>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="1">
+          <strong>2. Escolha o produto</strong>
           <p class="muted">Selecione o tipo principal do pedido.</p>
           <div class="option-grid">
             <button class="option" type="button" data-select="product" data-value="Convite">Convite</button>
@@ -127,7 +137,7 @@
         </div>
 
         <div class="step-panel" data-step="2">
-          <strong>2. Formato e tamanho</strong>
+          <strong>3. Formato e tamanho</strong>
           <p class="muted">Escolha o tamanho mais comum para o produto.</p>
           <div class="option-grid">
             <button class="option" type="button" data-select="format" data-value="A6">A6</button>
@@ -139,7 +149,7 @@
         </div>
 
         <div class="step-panel" data-step="3">
-          <strong>3. Papel e acabamento</strong>
+          <strong>4. Papel e acabamento</strong>
           <p class="muted">Escolha o papel ideal para a impressão.</p>
           <div class="option-grid">
             <button class="option" type="button" data-select="paper" data-value="Couch 150g">Couch 150g</button>
@@ -151,7 +161,7 @@
         </div>
 
         <div class="step-panel" data-step="4">
-          <strong>4. Envie o arquivo principal</strong>
+          <strong>5. Envie o arquivo principal</strong>
           <p class="muted">PDF pronto para imprimir (opcional neste prototipo).</p>
           <label class="file-field">
             <span>Selecionar arquivo</span>
@@ -160,7 +170,7 @@
         </div>
 
         <div class="step-panel" data-step="5">
-          <strong>5. Arquivos de referência (opcional)</strong>
+          <strong>6. Arquivos de referência (opcional)</strong>
           <p class="muted">Imagens, textos ou briefing para o design.</p>
           <label class="file-field">
             <span>Adicionar imagens</span>
@@ -170,7 +180,7 @@
         </div>
 
         <div class="step-panel" data-step="6">
-          <strong>6. Revisão do pedido</strong>
+          <strong>7. Revisão do pedido</strong>
           <p class="muted">Confira antes de seguir para o pagamento.</p>
           <div class="summary">
             <div><span>Produto:</span> <strong id="summary-product">-</strong></div>
@@ -181,7 +191,7 @@
         </div>
 
         <div class="step-panel" data-step="7">
-          <strong>7. Forma de pagamento</strong>
+          <strong>8. Forma de pagamento</strong>
           <p class="muted">Total confirma mais rápido. Entrada 50% exige validação manual.</p>
           <div class="option-grid">
             <button class="option" type="button" data-select="payment" data-value="Entrada 50%">Entrada 50%</button>
@@ -191,7 +201,7 @@
         </div>
 
         <div class="step-panel" data-step="8">
-          <strong>8. Pedido confirmado</strong>
+          <strong>9. Pedido confirmado</strong>
           <p class="muted">Obrigado! Seu pedido está em preparo e avisaremos quando estiver pronto.</p>
         </div>
       </div>

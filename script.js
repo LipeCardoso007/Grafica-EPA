@@ -28,6 +28,7 @@
   const optionButtons = modal.querySelectorAll('[data-select]');
 
   const selections = {
+    artReady: null,
     product: null,
     format: null,
     paper: null,
@@ -37,10 +38,11 @@
   let currentStep = 0;
 
   const requiredByStep = {
-    0: 'product',
-    1: 'format',
-    2: 'paper',
-    6: 'payment',
+    0: 'artReady',
+    1: 'product',
+    2: 'format',
+    3: 'paper',
+    7: 'payment',
   };
 
   const summaryFields = {
@@ -49,6 +51,10 @@
     paper: document.getElementById('summary-paper'),
     payment: document.getElementById('summary-payment'),
   };
+
+  const shouldSkipDesign = () =>
+    typeof selections.artReady === 'string' &&
+    selections.artReady.toLowerCase().startsWith('sim');
 
   const syncSummary = () => {
     Object.entries(summaryFields).forEach(([key, node]) => {
@@ -155,6 +161,10 @@
       if (currentStep === 0) {
         return;
       }
+      if (currentStep === 6 && shouldSkipDesign()) {
+        setStep(4);
+        return;
+      }
       setStep(currentStep - 1);
     });
   }
@@ -166,6 +176,10 @@
         return;
       }
       if (!validateStep()) {
+        return;
+      }
+      if (currentStep === 4 && shouldSkipDesign()) {
+        setStep(6);
         return;
       }
       setStep(currentStep + 1);
@@ -182,25 +196,36 @@
     (node) => node.id !== 'flow-modal',
   );
   const openButtons = document.querySelectorAll('[data-modal-open]');
+  const modalStack = [];
 
-  const closeInfoModal = (target) => {
+  const closeInfoModal = (target, options = {}) => {
     if (!target) {
       return;
     }
     target.classList.remove('is-open');
     target.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
+    if (options.back === false) {
+      return;
+    }
+    const previousId = modalStack.pop();
+    if (previousId) {
+      const previous = document.getElementById(previousId);
+      openInfoModal(previous, { skipStack: true });
+    }
   };
 
-  const openInfoModal = (target) => {
+  const openInfoModal = (target, options = {}) => {
     if (!target) {
       return;
     }
-    infoModals.forEach((modalNode) => {
-      if (modalNode !== target) {
-        closeInfoModal(modalNode);
+    const currentOpen = infoModals.find((modalNode) => modalNode.classList.contains('is-open'));
+    if (currentOpen && currentOpen !== target) {
+      if (!options.skipStack) {
+        modalStack.push(currentOpen.id);
       }
-    });
+      closeInfoModal(currentOpen, { back: false });
+    }
     target.classList.add('is-open');
     target.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -296,11 +321,10 @@
     if (event.key !== 'Escape') {
       return;
     }
-    infoModals.forEach((modalNode) => {
-      if (modalNode.classList.contains('is-open')) {
-        closeInfoModal(modalNode);
-      }
-    });
+    const currentOpen = infoModals.find((modalNode) => modalNode.classList.contains('is-open'));
+    if (currentOpen) {
+      closeInfoModal(currentOpen);
+    }
   });
 
   const adjustModal = document.getElementById('modal-adjust');

@@ -1,0 +1,136 @@
+﻿header {
+  padding: 28px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero {
+  padding: 16px 18px 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+main {
+  display: grid;
+  gap: 22px;
+  padding: 0 18px 36px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+
+.steps {
+  display: grid;
+  gap: 12px;
+}
+
+.step {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.step strong {
+  font-size: 1.05rem;
+}
+
+.scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.product {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  min-height: 160px;
+  display: grid;
+  gap: 10px;
+  scroll-snap-align: start;
+}
+
+.product span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.kiosk {
+  display: grid;
+  gap: 10px;
+  background: linear-gradient(160deg, rgba(225, 6, 0, 0.12), rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 18px;
+}
+
+.kiosk ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.info {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.faq {
+  display: grid;
+  gap: 10px;
+}
+
+.faq details {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 14px 16px;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+footer {
+  padding: 22px 18px 40px;
+  color: var(--muted);
+  display: grid;
+  gap: 12px;
+}
