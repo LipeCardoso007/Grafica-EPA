@@ -1,0 +1,370 @@
+﻿:root {
+  --bg: #0b0b0b;
+  --bg-2: #171717;
+  --ink: #ffffff;
+  --muted: #d4d4d4;
+  --accent: #e10600;
+  --accent-2: #ffffff;
+  --card: #141414;
+  --chip: #1c1c1c;
+  --stroke: #2a2a2a;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Gill Sans MT", "Helvetica Neue", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 520px at 85% -10%, rgba(225, 6, 0, 0.25), transparent 55%),
+    radial-gradient(700px 520px at -10% 20%, rgba(255, 255, 255, 0.18), transparent 55%),
+    linear-gradient(165deg, var(--bg), var(--bg-2));
+  min-height: 100vh;
+}
+
+header {
+  padding: 28px 18px 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: conic-gradient(from 180deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  color: #0b1212;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow);
+}
+
+.brand-title {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hero {
+  padding: 16px 18px 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cta {
+  flex: 1 1 160px;
+  padding: 14px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  color: #0b1212;
+  background: linear-gradient(120deg, var(--accent), #ff4d4d);
+  box-shadow: var(--shadow);
+}
+
+.cta.secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--stroke);
+}
+
+.hero-card {
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  padding: 18px;
+  border-radius: var(--radius);
+  display: grid;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+
+.chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  background: var(--chip);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border: 1px solid var(--stroke);
+}
+
+main {
+  display: grid;
+  gap: 22px;
+  padding: 0 18px 36px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+
+.steps {
+  display: grid;
+  gap: 12px;
+}
+
+.step {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.step strong {
+  font-size: 1.05rem;
+}
+
+.scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.product {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  min-height: 160px;
+  display: grid;
+  gap: 10px;
+  scroll-snap-align: start;
+}
+
+.product span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.kiosk {
+  display: grid;
+  gap: 10px;
+  background: linear-gradient(160deg, rgba(225, 6, 0, 0.12), rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 18px;
+}
+
+.kiosk ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.info {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.faq {
+  display: grid;
+  gap: 10px;
+}
+
+.faq details {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  padding: 14px 16px;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 420px) {
+  header {
+    padding: 22px 16px 10px;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-title {
+    font-size: 1rem;
+  }
+
+  .hero {
+    padding: 12px 16px 22px;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+  }
+
+  .cta-row {
+    flex-direction: column;
+  }
+
+  .cta {
+    width: 100%;
+  }
+
+  main {
+    padding: 0 16px 30px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .steps {
+    gap: 10px;
+  }
+
+  .step {
+    padding: 14px;
+  }
+
+  .scroll {
+    grid-auto-columns: minmax(200px, 85%);
+  }
+
+  .product {
+    min-height: 150px;
+  }
+
+  footer {
+    padding: 18px 16px 32px;
+  }
+}
+
+footer {
+  padding: 22px 18px 40px;
+  color: var(--muted);
+  display: grid;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(225, 6, 0, 0.15);
+  color: var(--ink);
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(225, 6, 0, 0.3);
+  font-size: 0.85rem;
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent-2);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+  animation: pulse 2.4s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp 0.7s ease forwards;
+}
+
+.reveal.delay-1 { animation-delay: 0.1s; }
+.reveal.delay-2 { animation-delay: 0.2s; }
+.reveal.delay-3 { animation-delay: 0.3s; }
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  header, .hero, main, footer {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero {
+    padding-top: 28px;
+  }
+
+  .hero h1 {
+    font-size: 2.6rem;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .pulse {
+    animation: none;
+  }
+}
+
