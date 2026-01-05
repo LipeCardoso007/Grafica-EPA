@@ -115,7 +115,7 @@
     if (!selections[key]) {
       const hint = getHint();
       if (hint) {
-        hint.textContent = 'Selecione uma opcao para continuar.';
+        hint.textContent = 'Selecione uma opção para continuar.';
       }
       return false;
     }
@@ -178,6 +178,54 @@
     }
   });
 
+  const infoModals = Array.from(document.querySelectorAll('.modal')).filter(
+    (node) => node.id !== 'flow-modal',
+  );
+  const openButtons = document.querySelectorAll('[data-modal-open]');
+
+  const closeInfoModal = (target) => {
+    if (!target) {
+      return;
+    }
+    target.classList.remove('is-open');
+    target.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+  };
+
+  const openInfoModal = (target) => {
+    if (!target) {
+      return;
+    }
+    target.classList.add('is-open');
+    target.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+  };
+
+  openButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const targetId = button.getAttribute('data-modal-open');
+      const target = document.getElementById(targetId);
+      openInfoModal(target);
+    });
+  });
+
+  infoModals.forEach((modalNode) => {
+    modalNode.querySelectorAll('[data-close]').forEach((button) => {
+      button.addEventListener('click', () => closeInfoModal(modalNode));
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') {
+      return;
+    }
+    infoModals.forEach((modalNode) => {
+      if (modalNode.classList.contains('is-open')) {
+        closeInfoModal(modalNode);
+      }
+    });
+  });
+
   const carouselTrack = document.querySelector('.carousel-track');
   if (carouselTrack) {
     const items = Array.from(carouselTrack.children);
@@ -199,3 +247,4 @@
     }
   }
 })();
+

@@ -33,6 +33,10 @@ button {
 
 header {
   padding: 28px 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .brand {
@@ -43,7 +47,7 @@ header {
 
 .logo {
   width: 72px;
-  height: 72px;
+  height: 60px;
   border-radius: 16px;
   display: grid;
   place-items: center;
@@ -66,6 +70,28 @@ header {
   font-size: 1.1rem;
   letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+.user-greeting {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: #101010;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.user-greeting__icon {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
 }
 
 .hero {
@@ -497,7 +523,7 @@ body.modal-open {
 
   .logo {
     width: 64px;
-    height: 64px;
+    height: 54px;
   }
 
   .brand-title {
