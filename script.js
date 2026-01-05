@@ -177,4 +177,25 @@
       closeModal();
     }
   });
+
+  const carouselTrack = document.querySelector('.carousel-track');
+  if (carouselTrack) {
+    const items = Array.from(carouselTrack.children);
+    if (items.length) {
+      let index = 0;
+      items[0].classList.add('is-active');
+      setInterval(() => {
+        const current = items[index];
+        current.classList.add('is-exiting');
+        current.classList.remove('is-active');
+        index = (index + 1) % items.length;
+        const next = items[index];
+        next.classList.remove('is-exiting');
+        next.classList.add('is-active');
+        setTimeout(() => {
+          current.classList.remove('is-exiting');
+        }, 460);
+      }, 2600);
+    }
+  }
 })();
