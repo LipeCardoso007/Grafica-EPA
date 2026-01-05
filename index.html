@@ -21,9 +21,117 @@
     <h1 class="reveal">Imprima em minutos, direto do seu celular ou tablet.</h1>
     <p class="reveal delay-1">Escolha o produto, envie o arquivo e retire sem fila. Tudo em um fluxo rapido, claro e auto guiado.</p>
     <div class="cta-row reveal delay-2">
-      <a class="cta" href="#produtos">Comecar agora</a>
+      <button class="cta" type="button" id="flow-start">Comecar agora</button>
       <a class="cta secondary" href="#como">Ver como funciona</a>
+    </div>
+  </section>
+
+  <div class="modal" id="flow-modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="flow-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Autoatendimento</div>
+          <h2 id="flow-title">Monte seu pedido</h2>
+          <p class="modal__progress" id="flow-progress">Etapa 1 de 8</p>
+          <div class="progress">
+            <span id="flow-progress-bar"></span>
+          </div>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+
+      <div class="modal__body">
+        <div class="step-panel is-active" data-step="1">
+          <strong>1. Escolha o produto</strong>
+          <p class="muted">Selecione o tipo principal do pedido.</p>
+          <div class="option-grid">
+            <button class="option" type="button" data-select="product" data-value="Convite">Convite</button>
+            <button class="option" type="button" data-select="product" data-value="Impressao">Impressao</button>
+            <button class="option" type="button" data-select="product" data-value="Panfleto">Panfleto</button>
+            <button class="option" type="button" data-select="product" data-value="Adesivo">Adesivo</button>
+          </div>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="2">
+          <strong>2. Formato e tamanho</strong>
+          <p class="muted">Escolha o tamanho mais comum para o produto.</p>
+          <div class="option-grid">
+            <button class="option" type="button" data-select="format" data-value="A6">A6</button>
+            <button class="option" type="button" data-select="format" data-value="A5">A5</button>
+            <button class="option" type="button" data-select="format" data-value="A4">A4</button>
+            <button class="option" type="button" data-select="format" data-value="Personalizado">Personalizado</button>
+          </div>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="3">
+          <strong>3. Papel e acabamento</strong>
+          <p class="muted">Escolha o papel ideal para a impressao.</p>
+          <div class="option-grid">
+            <button class="option" type="button" data-select="paper" data-value="Couch 150g">Couch 150g</button>
+            <button class="option" type="button" data-select="paper" data-value="Couch 300g">Couch 300g</button>
+            <button class="option" type="button" data-select="paper" data-value="Offset 120g">Offset 120g</button>
+            <button class="option" type="button" data-select="paper" data-value="Outro">Outro</button>
+          </div>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="4">
+          <strong>4. Envie o arquivo principal</strong>
+          <p class="muted">PDF pronto para imprimir (opcional neste prototipo).</p>
+          <label class="file-field">
+            <span>Selecionar arquivo</span>
+            <input type="file" />
+          </label>
+        </div>
+
+        <div class="step-panel" data-step="5">
+          <strong>5. Arquivos de referencia (opcional)</strong>
+          <p class="muted">Imagens, textos ou briefing para o design.</p>
+          <label class="file-field">
+            <span>Adicionar imagens</span>
+            <input type="file" multiple />
+          </label>
+          <textarea class="text-area" rows="4" placeholder="Descreva sua ideia ou escreva o texto aqui."></textarea>
+        </div>
+
+        <div class="step-panel" data-step="6">
+          <strong>6. Revisao do pedido</strong>
+          <p class="muted">Confira antes de seguir para o pagamento.</p>
+          <div class="summary">
+            <div><span>Produto:</span> <strong id="summary-product">-</strong></div>
+            <div><span>Tamanho:</span> <strong id="summary-format">-</strong></div>
+            <div><span>Papel:</span> <strong id="summary-paper">-</strong></div>
+            <div><span>Pagamento:</span> <strong id="summary-payment">-</strong></div>
+          </div>
+        </div>
+
+        <div class="step-panel" data-step="7">
+          <strong>7. Forma de pagamento</strong>
+          <p class="muted">Total confirma mais rapido. Entrada 50% exige validacao manual.</p>
+          <div class="option-grid">
+            <button class="option" type="button" data-select="payment" data-value="Entrada 50%">Entrada 50%</button>
+            <button class="option" type="button" data-select="payment" data-value="Total (mais rapido)">Total (mais rapido)</button>
+          </div>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="8">
+          <strong>8. Pedido confirmado</strong>
+          <p class="muted">Obrigado! Seu pedido esta em preparo e avisaremos quando estiver pronto.</p>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn ghost" type="button" id="flow-back" disabled>Voltar</button>
+        <button class="btn" type="button" id="flow-next">Continuar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js" defer></script>
 </body>
 </html>
+
