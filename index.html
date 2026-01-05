@@ -29,6 +29,10 @@
     <div class="cta-row reveal delay-2">
       <button class="cta" type="button" id="flow-start">Começar agora</button>
       <a class="cta secondary" href="#como">Ver como funciona</a>
+      <button class="cta secondary orders-cta" type="button" data-modal-open="modal-orders">
+        Acompanhar meus pedidos
+        <span class="alert-dot" aria-label="Pedido aguardando aprovação"></span>
+      </button>
     </div>
     <div class="carousel reveal delay-3">
       <div class="carousel-track" aria-label="Carrossel de produtos">
@@ -287,15 +291,154 @@
         <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
       </div>
       <div class="modal__body">
-        <div class="summary">
-          <div><strong>Nome:</strong> Carlos Silva</div>
-          <div><strong>Telefone:</strong> (11) 91234-5678</div>
-          <div><strong>CPF:</strong> 123.456.789-00</div>
+        <div class="summary" id="login-summary">
+          <div><strong>Nome:</strong> <span id="login-name">Carlos Silva</span></div>
+          <div><strong>Telefone:</strong> <span id="login-phone">(11) 91234-5678</span></div>
+          <div><strong>CPF:</strong> <span id="login-cpf">123.456.789-00</span></div>
+        </div>
+        <div class="form-row" id="login-edit">
+          <label class="field">
+            <span>Nome</span>
+            <input type="text" id="login-name-input" value="Carlos Silva" />
+          </label>
+          <label class="field">
+            <span>Telefone</span>
+            <input type="tel" id="login-phone-input" value="(11) 91234-5678" />
+          </label>
+          <label class="field">
+            <span>CPF</span>
+            <input type="text" id="login-cpf-input" value="123.456.789-00" />
+          </label>
+          <p class="step-hint success" id="login-success" hidden>Dados atualizados com sucesso.</p>
         </div>
       </div>
       <div class="modal__footer">
-        <button class="btn ghost" type="button">Editar numero de celular</button>
+        <button class="btn ghost" type="button" id="login-edit-toggle">Salvar alteração</button>
         <button class="btn" type="button" data-close>SAIR</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-orders" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-orders-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Pedidos</div>
+          <h2 id="modal-orders-title">Status dos pedidos</h2>
+          <p class="modal__progress">Acompanhe o andamento em tempo real.</p>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <div class="summary">
+          <div class="status-line status-line--boxed">
+            <span class="status-dot status-dot--yellow"></span>
+            <strong>Pedido #2031</strong> - Em produção (previsão hoje).
+          </div>
+          <div class="status-line status-line--boxed">
+            <span class="status-dot status-dot--green"></span>
+            <strong>Pedido #2027</strong> - Pronto para retirada.
+          </div>
+          <div class="status-line status-line--boxed">
+            <span class="status-dot status-dot--blue"></span>
+            <strong>Pedido #2022</strong> - Aguardando confirmação.
+          </div>
+          <div class="status-line status-line--boxed">
+            <span class="status-dot status-dot--red"></span>
+            <strong>Pedido #2019</strong> - Aguardando confirmação da arte.
+          </div>
+          <div class="status-actions">
+            <button class="cta secondary" type="button" data-modal-open="modal-art">Ver arte</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn" type="button" data-close>Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-art" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-art-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Arte</div>
+          <h2 id="modal-art-title">Pré-visualização</h2>
+          <p class="modal__progress">Confirme se está tudo certo.</p>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <div class="art-placeholder">
+          <span>Imagem da arte</span>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn ghost" type="button" data-modal-open="modal-adjust">Solicitar ajustes</button>
+        <button class="btn approve" type="button" data-modal-open="modal-approve">Aprovar arte</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-adjust" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-adjust-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Ajustes</div>
+          <h2 id="modal-adjust-title">Solicitar ajuste</h2>
+          <p class="modal__progress">Descreva o que precisa ser alterado.</p>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__body">
+        <textarea class="text-area" rows="5" placeholder="Digite os ajustes desejados."></textarea>
+        <label class="file-field">
+          <span>Anexar imagem (PNG ou JPG)</span>
+          <input type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" />
+        </label>
+        <p class="step-hint success" id="adjust-success" hidden>Ajuste enviado.</p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn ghost" type="button" id="adjust-send">Enviar</button>
+        <button class="btn" type="button" id="adjust-send-new">Enviar novo ajuste</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-approve" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-approve-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Confirmacao</div>
+          <h2 id="modal-approve-title">Deseja aprovar?</h2>
+          <p class="modal__progress">Apos a aprovacao nao sera possivel enviar ajustes.</p>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__footer">
+        <button class="btn ghost" type="button" data-close>Cancelar</button>
+        <button class="btn approve" type="button" id="approve-confirm">Aprovar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-approved" aria-hidden="true">
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modal-approved-title">
+      <div class="modal__header">
+        <div>
+          <div class="modal__eyebrow">Sucesso</div>
+          <h2 id="modal-approved-title">Arte aprovada</h2>
+          <p class="modal__progress">Seu pedido segue para produção.</p>
+        </div>
+        <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal__footer">
+        <button class="btn approve" type="button" data-close>Ok</button>
       </div>
     </div>
   </div>
@@ -303,4 +446,3 @@
   <script src="script.js" defer></script>
 </body>
 </html>
-

@@ -196,6 +196,11 @@
     if (!target) {
       return;
     }
+    infoModals.forEach((modalNode) => {
+      if (modalNode !== target) {
+        closeInfoModal(modalNode);
+      }
+    });
     target.classList.add('is-open');
     target.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
@@ -215,6 +220,78 @@
     });
   });
 
+  const loginEditToggle = document.getElementById('login-edit-toggle');
+  const loginSummary = document.getElementById('login-summary');
+  const loginSuccess = document.getElementById('login-success');
+  const loginName = document.getElementById('login-name');
+  const loginPhone = document.getElementById('login-phone');
+  const loginCpf = document.getElementById('login-cpf');
+  const loginNameInput = document.getElementById('login-name-input');
+  const loginPhoneInput = document.getElementById('login-phone-input');
+  const loginCpfInput = document.getElementById('login-cpf-input');
+
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 10) {
+      const part1 = digits.slice(0, 2);
+      const part2 = digits.slice(2, 6);
+      const part3 = digits.slice(6, 10);
+      if (!digits.length) return '';
+      if (digits.length <= 2) return `(${part1}`;
+      if (digits.length <= 6) return `(${part1}) ${part2}`;
+      return `(${part1}) ${part2}-${part3}`;
+    }
+    const part1 = digits.slice(0, 2);
+    const part2 = digits.slice(2, 7);
+    const part3 = digits.slice(7, 11);
+    return `(${part1}) ${part2}-${part3}`;
+  };
+
+  const formatCpf = (value) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    const part1 = digits.slice(0, 3);
+    const part2 = digits.slice(3, 6);
+    const part3 = digits.slice(6, 9);
+    const part4 = digits.slice(9, 11);
+    if (!digits.length) return '';
+    if (digits.length <= 3) return part1;
+    if (digits.length <= 6) return `${part1}.${part2}`;
+    if (digits.length <= 9) return `${part1}.${part2}.${part3}`;
+    return `${part1}.${part2}.${part3}-${part4}`;
+  };
+
+  if (loginPhoneInput) {
+    loginPhoneInput.addEventListener('input', () => {
+      loginPhoneInput.value = formatPhone(loginPhoneInput.value);
+    });
+  }
+
+  if (loginCpfInput) {
+    loginCpfInput.addEventListener('input', () => {
+      loginCpfInput.value = formatCpf(loginCpfInput.value);
+    });
+  }
+
+  if (loginEditToggle) {
+    loginEditToggle.addEventListener('click', () => {
+      if (loginName && loginNameInput) {
+        loginName.textContent = loginNameInput.value.trim() || loginName.textContent;
+      }
+      if (loginPhone && loginPhoneInput) {
+        loginPhone.textContent = loginPhoneInput.value.trim() || loginPhone.textContent;
+      }
+      if (loginCpf && loginCpfInput) {
+        loginCpf.textContent = loginCpfInput.value.trim() || loginCpf.textContent;
+      }
+      if (loginSummary) {
+        loginSummary.hidden = false;
+      }
+      if (loginSuccess) {
+        loginSuccess.hidden = false;
+      }
+    });
+  }
+
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') {
       return;
@@ -225,6 +302,53 @@
       }
     });
   });
+
+  const adjustModal = document.getElementById('modal-adjust');
+  const adjustSend = document.getElementById('adjust-send');
+  const adjustSendNew = document.getElementById('adjust-send-new');
+  const adjustSuccess = document.getElementById('adjust-success');
+  if (adjustModal && adjustSuccess) {
+    const adjustTextarea = adjustModal.querySelector('textarea');
+    const adjustFile = adjustModal.querySelector('input[type="file"]');
+
+    const showAdjustSuccess = () => {
+      adjustSuccess.hidden = false;
+    };
+
+    const resetAdjustForm = () => {
+      if (adjustTextarea) {
+        adjustTextarea.value = '';
+      }
+      if (adjustFile) {
+        adjustFile.value = '';
+      }
+      adjustSuccess.hidden = true;
+    };
+
+    if (adjustSend) {
+      adjustSend.addEventListener('click', showAdjustSuccess);
+    }
+    if (adjustSendNew) {
+      adjustSendNew.addEventListener('click', () => {
+        resetAdjustForm();
+      });
+    }
+    adjustModal.querySelectorAll('[data-close]').forEach((button) => {
+      button.addEventListener('click', resetAdjustForm);
+    });
+  }
+
+  const approveConfirm = document.getElementById('approve-confirm');
+  const approveModal = document.getElementById('modal-approve');
+  const artModal = document.getElementById('modal-art');
+  const approvedModal = document.getElementById('modal-approved');
+  if (approveConfirm) {
+    approveConfirm.addEventListener('click', () => {
+      closeInfoModal(approveModal);
+      closeInfoModal(artModal);
+      openInfoModal(approvedModal);
+    });
+  }
 
   const carouselTrack = document.querySelector('.carousel-track');
   if (carouselTrack) {
