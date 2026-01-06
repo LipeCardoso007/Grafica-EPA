@@ -1,11 +1,13 @@
 ﻿<!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gráfica Autoatendimento - Protótipo Mobile</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header>
     <div class="brand">
@@ -21,11 +23,13 @@
       <img class="user-greeting__icon" src="IMGs/do-utilizador.svg" alt="" aria-hidden="true" />
       <span>Olá, cliente</span>
     </button>
+
   </header>
 
   <section class="hero">
     <h1 class="reveal">Imprima em minutos, direto do seu celular ou tablet.</h1>
-    <p class="reveal delay-1">Escolha o produto, envie o arquivo e retire sem fila. Tudo em um fluxo rápido, claro e autoguiado.</p>
+    <p class="reveal delay-1">Escolha o produto, envie o arquivo e retire sem fila. Tudo em um fluxo rápido, claro e
+      autoguiado.</p>
     <div class="cta-row reveal delay-2">
       <button class="cta" type="button" id="flow-start">Começar agora</button>
       <a class="cta secondary" href="#como">Ver como funciona</a>
@@ -105,10 +109,11 @@
         <div>
           <div class="modal__eyebrow">Autoatendimento</div>
           <h2 id="flow-title">Monte seu pedido</h2>
-          <p class="modal__progress" id="flow-progress">Etapa 1 de 9</p>
+          <p class="modal__progress" id="flow-progress">Etapa 1 de 10</p>
           <div class="progress">
             <span id="flow-progress-bar"></span>
           </div>
+          <p class="modal__progress" id="flow-total">Total estimado: -</p>
         </div>
         <button class="modal__close" type="button" data-close aria-label="Fechar">&times;</button>
       </div>
@@ -118,8 +123,12 @@
           <strong>1. Tem a arte pronta?</strong>
           <p class="muted">Assim definimos o proximo passo.</p>
           <div class="option-grid">
-            <button class="option" type="button" data-select="artReady" data-value="Sim, enviar arte">Sim, enviar arte</button>
-            <button class="option" type="button" data-select="artReady" data-value="Nao, solicitar design">Não, solicitar design</button>
+            <button class="option" type="button" data-select="artReady" data-value="Sim, enviar arte">
+              Sim, enviar arte <small>(R$ 0,00)</small>
+            </button>
+            <button class="option" type="button" data-select="artReady" data-value="Nao, solicitar design">
+              Não, solicitar design <small>(R$ 25,00)</small>
+            </button>
           </div>
           <p class="step-hint" data-hint></p>
         </div>
@@ -128,10 +137,18 @@
           <strong>2. Escolha o produto</strong>
           <p class="muted">Selecione o tipo principal do pedido.</p>
           <div class="option-grid">
-            <button class="option" type="button" data-select="product" data-value="Convite">Convite</button>
-            <button class="option" type="button" data-select="product" data-value="Impressão">Impressão</button>
-            <button class="option" type="button" data-select="product" data-value="Panfleto">Panfleto</button>
-            <button class="option" type="button" data-select="product" data-value="Adesivo">Adesivo</button>
+            <button class="option" type="button" data-select="product" data-value="Convite" data-price="35">
+              Convite <small>(R$ 35,00)</small>
+            </button>
+            <button class="option" type="button" data-select="product" data-value="Impress?o" data-price="20">
+              Impress?o <small>(R$ 20,00)</small>
+            </button>
+            <button class="option" type="button" data-select="product" data-value="Panfleto" data-price="45">
+              Panfleto <small>(R$ 45,00)</small>
+            </button>
+            <button class="option" type="button" data-select="product" data-value="Adesivo" data-price="30">
+              Adesivo <small>(R$ 30,00)</small>
+            </button>
           </div>
           <p class="step-hint" data-hint></p>
         </div>
@@ -161,7 +178,17 @@
         </div>
 
         <div class="step-panel" data-step="4">
-          <strong>5. Envie o arquivo principal</strong>
+          <strong>5. Quantidade</strong>
+          <p class="muted">Informe quantas unidades deseja imprimir.</p>
+          <label class="field">
+            <span>Quantidade</span>
+            <input type="number" id="quantity-input" min="1" placeholder="Ex: 100" />
+          </label>
+          <p class="step-hint" data-hint></p>
+        </div>
+
+        <div class="step-panel" data-step="5">
+          <strong>6. Envie o arquivo principal</strong>
           <p class="muted">PDF pronto para imprimir (opcional neste prototipo).</p>
           <label class="file-field">
             <span>Selecionar arquivo</span>
@@ -169,8 +196,8 @@
           </label>
         </div>
 
-        <div class="step-panel" data-step="5">
-          <strong>6. Arquivos de referência (opcional)</strong>
+        <div class="step-panel" data-step="6">
+          <strong>7. Arquivos de refer?ncia (opcional)</strong>
           <p class="muted">Imagens, textos ou briefing para o design.</p>
           <label class="file-field">
             <span>Adicionar imagens</span>
@@ -179,30 +206,34 @@
           <textarea class="text-area" rows="4" placeholder="Descreva sua ideia ou escreva o texto aqui."></textarea>
         </div>
 
-        <div class="step-panel" data-step="6">
-          <strong>7. Revisão do pedido</strong>
+        <div class="step-panel" data-step="7">
+          <strong>8. Revis?o do pedido</strong>
           <p class="muted">Confira antes de seguir para o pagamento.</p>
           <div class="summary">
             <div><span>Produto:</span> <strong id="summary-product">-</strong></div>
             <div><span>Tamanho:</span> <strong id="summary-format">-</strong></div>
             <div><span>Papel:</span> <strong id="summary-paper">-</strong></div>
+            <div><span>Quantidade:</span> <strong id="summary-quantity">-</strong></div>
+            <div><span>Design:</span> <strong id="summary-design">-</strong></div>
             <div><span>Pagamento:</span> <strong id="summary-payment">-</strong></div>
+            <div><span>Total estimado:</span> <strong id="summary-total">-</strong></div>
           </div>
         </div>
 
-        <div class="step-panel" data-step="7">
-          <strong>8. Forma de pagamento</strong>
-          <p class="muted">Total confirma mais rápido. Entrada 50% exige validação manual.</p>
+        <div class="step-panel" data-step="8">
+          <strong>9. Forma de pagamento</strong>
+          <p class="muted">Total confirma mais r?pido. Entrada 50% exige valida??o manual.</p>
           <div class="option-grid">
             <button class="option" type="button" data-select="payment" data-value="Entrada 50%">Entrada 50%</button>
-            <button class="option" type="button" data-select="payment" data-value="Total (mais rápido)">Total (mais rápido)</button>
+            <button class="option" type="button" data-select="payment" data-value="Total (mais r?pido)">Total (mais
+              r?pido)</button>
           </div>
           <p class="step-hint" data-hint></p>
         </div>
 
-        <div class="step-panel" data-step="8">
-          <strong>9. Pedido confirmado</strong>
-          <p class="muted">Obrigado! Seu pedido está em preparo e avisaremos quando estiver pronto.</p>
+        <div class="step-panel" data-step="9">
+          <strong>10. Pedido confirmado</strong>
+          <p class="muted">Obrigado! Seu pedido est? em preparo e avisaremos quando estiver pronto.</p>
         </div>
       </div>
 
@@ -226,11 +257,11 @@
       </div>
       <div class="modal__body">
         <div class="summary">
-          <div><strong>Convites</strong> - sociais, corporativos, eventos.</div>
-          <div><strong>Impressão</strong> - documentos e materiais variados.</div>
-          <div><strong>Panfletos</strong> - A5, A6, promocionais.</div>
-          <div><strong>Adesivos</strong> - vinil, fosco ou brilho.</div>
-          <div><strong>Banners</strong> - lona com ilhos.</div>
+          <div><strong>Convites</strong> - sociais, corporativos, eventos (R$ 35,00).</div>
+          <div><strong>Impress?o</strong> - documentos e materiais variados (R$ 20,00).</div>
+          <div><strong>Panfletos</strong> - A5, A6, promocionais (R$ 45,00).</div>
+          <div><strong>Adesivos</strong> - vinil, fosco ou brilho (R$ 30,00).</div>
+          <div><strong>Banners</strong> - lona com ilhos (sob consulta).</div>
         </div>
       </div>
       <div class="modal__footer">
@@ -342,23 +373,51 @@
       </div>
       <div class="modal__body">
         <div class="summary">
-          <div class="status-line status-line--boxed">
+          <div class="status-line status-line--boxed" data-status="producao">
             <span class="status-dot status-dot--yellow"></span>
-            <strong>Pedido #2031</strong> - Em produção (previsão hoje).
+            <strong>Pedido #2031</strong> - Em produ??o (previs?o hoje).
+            <div class="order-menu">
+              <button class="order-menu__toggle" type="button" aria-label="Mais opcoes">...</button>
+              <div class="order-menu__panel">
+                <button class="cta secondary order-cancel" type="button" data-order="2031">Cancelar</button>
+                <button class="cta secondary order-edit" type="button" data-order="2031">Editar pedido</button>
+              </div>
+            </div>
           </div>
-          <div class="status-line status-line--boxed">
+          <div class="status-line status-line--boxed" data-status="pronto">
             <span class="status-dot status-dot--green"></span>
             <strong>Pedido #2027</strong> - Pronto para retirada.
+            <div class="order-menu">
+              <button class="order-menu__toggle" type="button" aria-label="Mais opcoes">...</button>
+              <div class="order-menu__panel">
+                <button class="cta secondary order-cancel" type="button" data-order="2027">Cancelar</button>
+                <button class="cta secondary order-edit" type="button" data-order="2027">Editar pedido</button>
+              </div>
+            </div>
           </div>
-          <div class="status-line status-line--boxed">
+          <div class="status-line status-line--boxed" data-status="aguardando">
             <span class="status-dot status-dot--blue"></span>
-            <strong>Pedido #2022</strong> - Aguardando confirmação.
+            <strong>Pedido #2022</strong> - Aguardando confirma??o.
+            <div class="order-menu">
+              <button class="order-menu__toggle" type="button" aria-label="Mais opcoes">...</button>
+              <div class="order-menu__panel">
+                <button class="cta secondary order-cancel" type="button" data-order="2022">Cancelar</button>
+                <button class="cta secondary order-edit" type="button" data-order="2022">Editar pedido</button>
+              </div>
+            </div>
           </div>
-          <div class="status-line status-line--boxed">
+          <div class="status-line status-line--boxed" data-status="aguardando-arte">
             <span class="status-dot status-dot--red"></span>
-            <strong>Pedido #2019</strong> - Aguardando confirmação da arte.
+            <strong>Pedido #2019</strong> - Aguardando confirma??o da arte.
+            <div class="order-menu">
+              <button class="order-menu__toggle" type="button" aria-label="Mais opcoes">...</button>
+              <div class="order-menu__panel">
+                <button class="cta secondary order-cancel" type="button" data-order="2019">Cancelar</button>
+                <button class="cta secondary order-edit" type="button" data-order="2019">Editar pedido</button>
+              </div>
+            </div>
           </div>
-          <div class="status-actions">
+        <div class="status-actions">
             <button class="cta secondary" type="button" data-modal-open="modal-art">Ver arte</button>
           </div>
         </div>
@@ -455,4 +514,5 @@
 
   <script src="script.js" defer></script>
 </body>
+
 </html>

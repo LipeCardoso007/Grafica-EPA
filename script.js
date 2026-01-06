@@ -15,23 +15,22 @@
 
   const modal = document.getElementById('flow-modal');
   const startButton = document.getElementById('flow-start');
-  if (!modal || !startButton) {
-    return;
-  }
-
-  const stepPanels = Array.from(modal.querySelectorAll('.step-panel'));
+  const stepPanels = modal ? Array.from(modal.querySelectorAll('.step-panel')) : [];
   const backButton = document.getElementById('flow-back');
   const nextButton = document.getElementById('flow-next');
   const progressText = document.getElementById('flow-progress');
   const progressBar = document.getElementById('flow-progress-bar');
-  const closeButtons = modal.querySelectorAll('[data-close]');
-  const optionButtons = modal.querySelectorAll('[data-select]');
+  const totalText = document.getElementById('flow-total');
+  const closeButtons = modal ? modal.querySelectorAll('[data-close]') : [];
+  const optionButtons = modal ? modal.querySelectorAll('[data-select]') : [];
 
   const selections = {
     artReady: null,
     product: null,
+    productPrice: null,
     format: null,
     paper: null,
+    quantity: null,
     payment: null,
   };
 
@@ -42,14 +41,92 @@
     1: 'product',
     2: 'format',
     3: 'paper',
-    7: 'payment',
+    4: 'quantity',
+    8: 'payment',
   };
 
   const summaryFields = {
     product: document.getElementById('summary-product'),
     format: document.getElementById('summary-format'),
     paper: document.getElementById('summary-paper'),
+    quantity: document.getElementById('summary-quantity'),
+    design: document.getElementById('summary-design'),
     payment: document.getElementById('summary-payment'),
+    total: document.getElementById('summary-total'),
+  };
+  const quantityInput = document.getElementById('quantity-input');
+  const designFee = 25;
+
+  const formatMultipliers = {
+    A6: 0.9,
+    A5: 1,
+    A4: 1.2,
+    Personalizado: 1.4,
+  };
+
+  const paperMultipliers = {
+    'Couch 150g': 1,
+    'Couch 300g': 1.4,
+    'Offset 120g': 1.1,
+    Outro: 1.3,
+  };
+
+  const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+
+  const getSelectedProductPrice = () => {
+    if (Number.isFinite(selections.productPrice)) {
+      return selections.productPrice;
+    }
+    const activeProduct = modal.querySelector('[data-select="product"].option--active');
+    if (!activeProduct) {
+      return null;
+    }
+    const price = Number(activeProduct.dataset.price);
+    return Number.isFinite(price) ? price : null;
+  };
+
+  const getQuantityValue = () => {
+    if (quantityInput) {
+      const rawValue = quantityInput.value.trim();
+      if (!rawValue) {
+        return 1;
+      }
+      const value = Number(rawValue);
+      if (Number.isFinite(value) && value > 0) {
+        return value;
+      }
+    }
+    const fallback = Number(selections.quantity);
+    return Number.isFinite(fallback) && fallback > 0 ? fallback : null;
+  };
+
+  const calculateTotal = () => {
+    const productPrice = getSelectedProductPrice();
+    const quantity = getQuantityValue();
+    if (!productPrice || !selections.format || !selections.paper || !quantity) {
+      return null;
+    }
+    const formatMultiplier = formatMultipliers[selections.format] || 1;
+    const paperMultiplier = paperMultipliers[selections.paper] || 1;
+    const baseTotal = productPrice * formatMultiplier * paperMultiplier * quantity;
+    const needsDesign = !shouldSkipDesign();
+    return baseTotal + (needsDesign ? designFee : 0);
+  };
+
+  const calculateLiveTotal = () => {
+    const productPrice = getSelectedProductPrice();
+    const quantity = getQuantityValue();
+    const needsDesign = selections.artReady ? !shouldSkipDesign() : false;
+    if (!productPrice || !quantity) {
+      return needsDesign ? designFee : 0;
+    }
+    const formatMultiplier = selections.format ? formatMultipliers[selections.format] || 1 : 1;
+    const paperMultiplier = selections.paper ? paperMultipliers[selections.paper] || 1 : 1;
+    const baseTotal = productPrice * formatMultiplier * paperMultiplier * quantity;
+    return baseTotal + (needsDesign ? designFee : 0);
   };
 
   const shouldSkipDesign = () =>
@@ -57,8 +134,25 @@
     selections.artReady.toLowerCase().startsWith('sim');
 
   const syncSummary = () => {
+    const total = calculateTotal();
+    const liveTotal = calculateLiveTotal();
+    if (totalText) {
+      totalText.textContent = `Total estimado: ${
+        liveTotal === null ? '-' : currencyFormatter.format(liveTotal)
+      }`;
+    }
     Object.entries(summaryFields).forEach(([key, node]) => {
       if (!node) {
+        return;
+      }
+      if (key === 'total') {
+        node.textContent = total ? currencyFormatter.format(total) : '-';
+        return;
+      }
+      if (key === 'design') {
+        node.textContent = shouldSkipDesign()
+          ? currencyFormatter.format(0)
+          : currencyFormatter.format(designFee);
         return;
       }
       node.textContent = selections[key] || '-';
@@ -89,6 +183,10 @@
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
+    if (quantityInput && !quantityInput.value.trim()) {
+      quantityInput.value = '1';
+      selections.quantity = 1;
+    }
     setStep(0);
   };
 
@@ -128,25 +226,41 @@
     return true;
   };
 
-  startButton.addEventListener('click', openModal);
-  closeButtons.forEach((button) => {
-    button.addEventListener('click', closeModal);
-  });
+  if (modal && startButton) {
+    startButton.addEventListener('click', openModal);
+    closeButtons.forEach((button) => {
+      button.addEventListener('click', closeModal);
+    });
 
-  modal.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+  }
 
   optionButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const key = button.dataset.select;
       const value = button.dataset.value;
+      const price = button.dataset.price;
       if (!key) {
         return;
       }
       selections[key] = value;
+      if (key === 'product') {
+        let parsedPrice = price ? Number(price) : null;
+        if (!Number.isFinite(parsedPrice)) {
+          const match = button.textContent.match(/R\$\s*([\d.,]+)/);
+          if (match) {
+            parsedPrice = Number(match[1].replace(/\./g, '').replace(',', '.'));
+          }
+        }
+        selections.productPrice = Number.isFinite(parsedPrice) ? parsedPrice : null;
+        if (!selections.quantity) {
+          selections.quantity = getQuantityValue() || 1;
+        }
+      }
       const siblings = modal.querySelectorAll(`[data-select="${key}"]`);
       siblings.forEach((item) => {
         item.classList.toggle('option--active', item === button);
@@ -156,20 +270,29 @@
     });
   });
 
-  if (backButton) {
+  if (quantityInput) {
+    quantityInput.addEventListener('input', () => {
+      const raw = quantityInput.value.trim();
+      selections.quantity = raw ? Number(raw) : null;
+      clearHint();
+      syncSummary();
+    });
+  }
+
+  if (modal && backButton) {
     backButton.addEventListener('click', () => {
       if (currentStep === 0) {
         return;
       }
-      if (currentStep === 6 && shouldSkipDesign()) {
-        setStep(4);
+      if (currentStep === 7 && shouldSkipDesign()) {
+        setStep(5);
         return;
       }
       setStep(currentStep - 1);
     });
   }
 
-  if (nextButton) {
+  if (modal && nextButton) {
     nextButton.addEventListener('click', () => {
       if (currentStep === stepPanels.length - 1) {
         closeModal();
@@ -178,19 +301,21 @@
       if (!validateStep()) {
         return;
       }
-      if (currentStep === 4 && shouldSkipDesign()) {
-        setStep(6);
+      if (currentStep === 5 && shouldSkipDesign()) {
+        setStep(7);
         return;
       }
       setStep(currentStep + 1);
     });
   }
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && modal.classList.contains('is-open')) {
-      closeModal();
-    }
-  });
+  if (modal) {
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+        closeModal();
+      }
+    });
+  }
 
   const infoModals = Array.from(document.querySelectorAll('.modal')).filter(
     (node) => node.id !== 'flow-modal',
@@ -373,6 +498,68 @@
       openInfoModal(approvedModal);
     });
   }
+
+  const closeAllOrderMenus = () => {
+    document.querySelectorAll('.order-menu').forEach((menu) => {
+      menu.classList.remove('is-open');
+    });
+  };
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.order-menu')) {
+      closeAllOrderMenus();
+    }
+  });
+
+  document.querySelectorAll('.order-menu__toggle').forEach((toggle) => {
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const menu = toggle.closest('.order-menu');
+      if (!menu) {
+        return;
+      }
+      const wasOpen = menu.classList.contains('is-open');
+      closeAllOrderMenus();
+      if (!wasOpen) {
+        menu.classList.add('is-open');
+      }
+    });
+  });
+
+  const cancelButtons = document.querySelectorAll('.order-cancel');
+  cancelButtons.forEach((button) => {
+    const container = button.closest('[data-status]');
+    const status = container ? container.dataset.status : null;
+    if (status === 'producao') {
+      button.disabled = true;
+      button.textContent = 'Nao cancelavel';
+    }
+    button.addEventListener('click', () => {
+      if (status === 'producao') {
+        return;
+      }
+      const orderId = button.dataset.order || 'Pedido';
+      const confirmed = window.confirm(`Deseja cancelar o ${orderId}?`);
+      if (!confirmed) {
+        return;
+      }
+      if (container) {
+        container.dataset.status = 'cancelado';
+        const dot = container.querySelector('.status-dot');
+        if (dot) {
+          dot.className = 'status-dot status-dot--red';
+        }
+        container.innerHTML = `<span class=\"status-dot status-dot--red\"></span><strong>${orderId}</strong> - Cancelado.`;
+      }
+    });
+  });
+
+  document.querySelectorAll('.order-edit').forEach((button) => {
+    button.addEventListener('click', () => {
+      const orderId = button.dataset.order || 'pedido';
+      window.alert(`Editar ${orderId} (em breve).`);
+    });
+  });
 
   const carouselTrack = document.querySelector('.carousel-track');
   if (carouselTrack) {
