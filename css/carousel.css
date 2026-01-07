@@ -1,12 +1,12 @@
 ﻿.carousel {
-  margin-top: 6px;
+  margin-top: 0.375rem;
 }
 
 .carousel-track {
   position: relative;
-  height: 160px;
+  height: 10rem;
   overflow: hidden;
-  padding: 6px 0 8px;
+  padding: 0.375rem 0 0.5rem;
 }
 
 .carousel-track::-webkit-scrollbar {
@@ -18,17 +18,17 @@
   inset: 0;
   margin: 0 auto;
   width: 100%;
-  max-width: 360px;
+  max-width: 22.5rem;
   height: 100%;
-  border-radius: 18px;
-  border: 1px solid var(--stroke);
+  border-radius: 1.125rem;
+  border: 0.0625rem solid var(--stroke);
   background: linear-gradient(140deg, rgba(225, 6, 0, 0.28), rgba(0, 0, 0, 0.65));
   display: grid;
   place-items: center;
   text-align: center;
-  padding: 18px;
+  padding: 1.125rem;
   opacity: 0;
-  transform: translateY(14px) scale(0.96);
+  transform: translateY(0.875rem) scale(0.96);
   transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
@@ -43,5 +43,5 @@
 
 .carousel-item.is-exiting {
   opacity: 0;
-  transform: translateY(-14px) scale(0.96);
+  transform: translateY(-0.875rem) scale(0.96);
 }

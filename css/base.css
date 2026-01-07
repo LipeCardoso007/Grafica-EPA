@@ -8,8 +8,8 @@
   --card: #141414;
   --chip: #1c1c1c;
   --stroke: #2a2a2a;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-  --radius: 18px;
+  --shadow: 0 1.125rem 2.5rem rgba(0, 0, 0, 0.35);
+  --radius: 1.125rem;
 }
 
 * { box-sizing: border-box; }
@@ -19,10 +19,11 @@ body {
   font-family: "Trebuchet MS", "Gill Sans MT", "Helvetica Neue", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(900px 520px at 85% -10%, rgba(225, 6, 0, 0.25), transparent 55%),
-    radial-gradient(700px 520px at -10% 20%, rgba(255, 255, 255, 0.18), transparent 55%),
+    radial-gradient(56.25rem 32.5rem at 85% -10%, rgba(225, 6, 0, 0.25), transparent 55%),
+    radial-gradient(43.75rem 32.5rem at -10% 20%, rgba(255, 255, 255, 0.18), transparent 55%),
     linear-gradient(165deg, var(--bg), var(--bg-2));
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -54,7 +55,7 @@ body.modal-open {
 
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(1rem);
   animation: fadeUp 0.7s ease forwards;
 }
 

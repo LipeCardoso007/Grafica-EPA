@@ -29,6 +29,9 @@
     product: null,
     productPrice: null,
     format: null,
+    customWidth: null,
+    customHeight: null,
+    customUnit: 'cm',
     paper: null,
     quantity: null,
     payment: null,
@@ -55,7 +58,16 @@
     total: document.getElementById('summary-total'),
   };
   const quantityInput = document.getElementById('quantity-input');
+  const customSizeFields = document.getElementById('custom-size-fields');
+  const customHeightInput = document.getElementById('custom-height');
+  const customWidthInput = document.getElementById('custom-width');
+  const customUnitInputs = document.querySelectorAll('input[name="custom_unit"]');
+  const clientFileInput = document.getElementById('client-file');
+  const clientRefsInput = document.getElementById('client-refs');
   const designFee = 25;
+  let orderSubmitted = false;
+  const orderSuccess = document.getElementById('order-success');
+  const orderError = document.getElementById('order-error');
 
   const formatMultipliers = {
     A6: 0.9,
@@ -133,6 +145,19 @@
     typeof selections.artReady === 'string' &&
     selections.artReady.toLowerCase().startsWith('sim');
 
+  const formatSizeLabel = () => {
+    if (selections.format !== 'Personalizado') {
+      return selections.format;
+    }
+    const width = Number(selections.customWidth);
+    const height = Number(selections.customHeight);
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+      return 'Personalizado';
+    }
+    const unit = (selections.customUnit || 'cm').toUpperCase();
+    return `Personalizado (${width} x ${height} ${unit})`;
+  };
+
   const syncSummary = () => {
     const total = calculateTotal();
     const liveTotal = calculateLiveTotal();
@@ -153,6 +178,10 @@
         node.textContent = shouldSkipDesign()
           ? currencyFormatter.format(0)
           : currencyFormatter.format(designFee);
+        return;
+      }
+      if (key === 'format') {
+        node.textContent = formatSizeLabel() || '-';
         return;
       }
       node.textContent = selections[key] || '-';
@@ -176,23 +205,55 @@
     if (progressBar) {
       progressBar.style.width = `${((index + 1) / stepPanels.length) * 100}%`;
     }
+    if (index === 2) {
+      updateCustomSizeVisibility();
+    }
     syncSummary();
+  };
+
+  const updateCustomSizeVisibility = () => {
+    if (!customSizeFields) {
+      return;
+    }
+    const activeFormat = modal
+      ? modal.querySelector('[data-select="format"].option--active')
+      : null;
+    const currentFormat = selections.format || (activeFormat ? activeFormat.dataset.value : null);
+    const shouldShow = currentFormat === 'Personalizado';
+    customSizeFields.hidden = !shouldShow;
+    if (!shouldShow) {
+      selections.customWidth = null;
+      selections.customHeight = null;
+      selections.customUnit = 'cm';
+      if (customWidthInput) customWidthInput.value = '';
+      if (customHeightInput) customHeightInput.value = '';
+      customUnitInputs.forEach((input) => {
+        input.checked = input.value === 'cm';
+      });
+    }
   };
 
   const openModal = () => {
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
+    modal.removeAttribute('inert');
     document.body.classList.add('modal-open');
     if (quantityInput && !quantityInput.value.trim()) {
       quantityInput.value = '1';
       selections.quantity = 1;
     }
     setStep(0);
+    updateCustomSizeVisibility();
   };
 
   const closeModal = () => {
+    const active = document.activeElement;
+    if (active && modal.contains(active)) {
+      active.blur();
+    }
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('inert', '');
     document.body.classList.remove('modal-open');
   };
 
@@ -219,9 +280,20 @@
     if (!selections[key]) {
       const hint = getHint();
       if (hint) {
-        hint.textContent = 'Selecione uma opção para continuar.';
+        hint.textContent = 'Selecione uma opcao para continuar.';
       }
       return false;
+    }
+    if (currentStep === 2 && selections.format === 'Personalizado') {
+      const width = Number(selections.customWidth);
+      const height = Number(selections.customHeight);
+      if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
+        const hint = getHint();
+        if (hint) {
+          hint.textContent = 'Informe altura e largura para o tamanho personalizado.';
+        }
+        return false;
+      }
     }
     return true;
   };
@@ -265,6 +337,9 @@
       siblings.forEach((item) => {
         item.classList.toggle('option--active', item === button);
       });
+      if (key === 'format') {
+        updateCustomSizeVisibility();
+      }
       clearHint();
       syncSummary();
     });
@@ -276,6 +351,35 @@
       selections.quantity = raw ? Number(raw) : null;
       clearHint();
       syncSummary();
+    });
+  }
+
+  if (customWidthInput) {
+    customWidthInput.addEventListener('input', () => {
+      const raw = customWidthInput.value.trim();
+      selections.customWidth = raw ? Number(raw) : null;
+      clearHint();
+      syncSummary();
+    });
+  }
+
+  if (customHeightInput) {
+    customHeightInput.addEventListener('input', () => {
+      const raw = customHeightInput.value.trim();
+      selections.customHeight = raw ? Number(raw) : null;
+      clearHint();
+      syncSummary();
+    });
+  }
+
+  if (customUnitInputs.length) {
+    customUnitInputs.forEach((input) => {
+      input.addEventListener('change', () => {
+        if (input.checked) {
+          selections.customUnit = input.value || 'cm';
+          syncSummary();
+        }
+      });
     });
   }
 
@@ -301,6 +405,56 @@
       if (!validateStep()) {
         return;
       }
+      if (currentStep === 8 && !orderSubmitted) {
+        orderSubmitted = true;
+        const total = calculateTotal();
+        const payload = new FormData();
+        payload.append('client_name', loginNameInput ? loginNameInput.value.trim() : '');
+        payload.append('client_phone', loginPhoneInput ? loginPhoneInput.value.trim() : '');
+        payload.append('client_cpf', loginCpfInput ? loginCpfInput.value.trim() : '');
+        payload.append('product', selections.product || '');
+        payload.append('format', formatSizeLabel() || selections.format || '');
+        payload.append('paper', selections.paper || '');
+        payload.append('quantity', String(Number(selections.quantity) || 0));
+        payload.append('payment', selections.payment || '');
+        payload.append('total', String(Number(total) || 0));
+        payload.append('art_ready', selections.artReady || '');
+        if (clientFileInput && clientFileInput.files && clientFileInput.files[0]) {
+          payload.append('client_file', clientFileInput.files[0]);
+        }
+        if (clientRefsInput && clientRefsInput.files && clientRefsInput.files.length) {
+          Array.from(clientRefsInput.files).forEach((file) => {
+            payload.append('client_refs[]', file);
+          });
+        }
+        fetch('api/orders_create.php', {
+          method: 'POST',
+          body: payload,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Erro ao enviar.');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (orderSuccess) {
+              const orderId = data && data.id ? ` Pedido #${data.id}.` : '';
+              orderSuccess.textContent = `Pedido enviado com sucesso.${orderId}`;
+              orderSuccess.hidden = false;
+            }
+            if (orderError) {
+              orderError.hidden = true;
+            }
+            loadClientOrders();
+          })
+          .catch(() => {
+            orderSubmitted = false;
+            if (orderError) {
+              orderError.hidden = false;
+            }
+          });
+      }
       if (currentStep === 5 && shouldSkipDesign()) {
         setStep(7);
         return;
@@ -320,15 +474,19 @@
   const infoModals = Array.from(document.querySelectorAll('.modal')).filter(
     (node) => node.id !== 'flow-modal',
   );
-  const openButtons = document.querySelectorAll('[data-modal-open]');
   const modalStack = [];
 
   const closeInfoModal = (target, options = {}) => {
     if (!target) {
       return;
     }
+    const active = document.activeElement;
+    if (active && target.contains(active)) {
+      active.blur();
+    }
     target.classList.remove('is-open');
     target.setAttribute('aria-hidden', 'true');
+    target.setAttribute('inert', '');
     document.body.classList.remove('modal-open');
     if (options.back === false) {
       return;
@@ -353,16 +511,9 @@
     }
     target.classList.add('is-open');
     target.setAttribute('aria-hidden', 'false');
+    target.removeAttribute('inert');
     document.body.classList.add('modal-open');
   };
-
-  openButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const targetId = button.getAttribute('data-modal-open');
-      const target = document.getElementById(targetId);
-      openInfoModal(target);
-    });
-  });
 
   infoModals.forEach((modalNode) => {
     modalNode.querySelectorAll('[data-close]').forEach((button) => {
@@ -499,66 +650,78 @@
     });
   }
 
+  let openOrderMenu = null;
   const closeAllOrderMenus = () => {
-    document.querySelectorAll('.order-menu').forEach((menu) => {
-      menu.classList.remove('is-open');
-    });
+    if (openOrderMenu) {
+      openOrderMenu.classList.remove('is-open');
+      openOrderMenu = null;
+    }
   };
 
   document.addEventListener('click', (event) => {
-    if (!event.target.closest('.order-menu')) {
-      closeAllOrderMenus();
+    const modalTrigger = event.target.closest('[data-modal-open]');
+    if (modalTrigger) {
+      const targetId = modalTrigger.getAttribute('data-modal-open');
+      const target = document.getElementById(targetId);
+      if (targetId === 'modal-art-upload') {
+        const step = event.target.closest('.step');
+        const orderIdRaw = step ? step.getAttribute('data-order-id') : null;
+        artOrderId = orderIdRaw ? Number(orderIdRaw) : null;
+        if (artOrderLabel) {
+          artOrderLabel.textContent = artOrderId ? `Pedido: #${artOrderId}` : 'Pedido: -';
+        }
+        if (artSuccess) {
+          artSuccess.hidden = true;
+        }
+        if (artError) {
+          artError.hidden = true;
+        }
+        if (artFileInput) {
+          artFileInput.value = '';
+        }
+      }
+      openInfoModal(target);
+      return;
     }
-  });
 
-  document.querySelectorAll('.order-menu__toggle').forEach((toggle) => {
-    toggle.addEventListener('click', (event) => {
+    const toggle = event.target.closest('.order-menu__toggle');
+    if (toggle) {
       event.stopPropagation();
       const menu = toggle.closest('.order-menu');
       if (!menu) {
         return;
       }
-      const wasOpen = menu.classList.contains('is-open');
-      closeAllOrderMenus();
-      if (!wasOpen) {
-        menu.classList.add('is-open');
+      if (openOrderMenu && openOrderMenu !== menu) {
+        openOrderMenu.classList.remove('is-open');
       }
-    });
-  });
-
-  const cancelButtons = document.querySelectorAll('.order-cancel');
-  cancelButtons.forEach((button) => {
-    const container = button.closest('[data-status]');
-    const status = container ? container.dataset.status : null;
-    if (status === 'producao') {
-      button.disabled = true;
-      button.textContent = 'Nao cancelavel';
+      const willOpen = openOrderMenu !== menu;
+      menu.classList.toggle('is-open', willOpen);
+      openOrderMenu = willOpen ? menu : null;
+      return;
     }
-    button.addEventListener('click', () => {
+
+    const cancelButton = event.target.closest('.order-cancel');
+    if (cancelButton) {
+      const container = cancelButton.closest('[data-status]');
+      const status = container ? container.dataset.status : null;
       if (status === 'producao') {
         return;
       }
-      const orderId = button.dataset.order || 'Pedido';
-      const confirmed = window.confirm(`Deseja cancelar o ${orderId}?`);
-      if (!confirmed) {
-        return;
-      }
-      if (container) {
-        container.dataset.status = 'cancelado';
-        const dot = container.querySelector('.status-dot');
-        if (dot) {
-          dot.className = 'status-dot status-dot--red';
-        }
-        container.innerHTML = `<span class=\"status-dot status-dot--red\"></span><strong>${orderId}</strong> - Cancelado.`;
-      }
-    });
-  });
+      const orderId = Number(cancelButton.dataset.order) || null;
+      cancelClientOrderRequest(orderId);
+      return;
+    }
 
-  document.querySelectorAll('.order-edit').forEach((button) => {
-    button.addEventListener('click', () => {
-      const orderId = button.dataset.order || 'pedido';
+    const editButton = event.target.closest('.order-edit');
+    if (editButton) {
+      const orderId = editButton.dataset.order || 'pedido';
       window.alert(`Editar ${orderId} (em breve).`);
-    });
+      return;
+    }
+
+    if (!event.target.closest('.order-menu')) {
+      closeAllOrderMenus();
+    }
   });
 
   const carouselTrack = document.querySelector('.carousel-track');
@@ -581,5 +744,598 @@
       }, 2600);
     }
   }
+
+  const ordersList = document.getElementById('orders-list');
+  const clientOrdersList = document.getElementById('client-orders-list');
+  const clientCancelError = document.getElementById('client-cancel-error');
+  const statusOrderLabel = document.getElementById('status-order-label');
+  const statusSelect = document.getElementById('status-select');
+  const statusResponsavel = document.getElementById('status-responsavel');
+  const statusNotes = document.getElementById('status-notes');
+  const statusSave = document.getElementById('status-save');
+  const statusSuccess = document.getElementById('status-success');
+  const statusError = document.getElementById('status-error');
+  const orderDetailsModal = document.getElementById('modal-order-details');
+  const orderDetailsId = document.getElementById('order-details-id');
+  const orderDetailsClient = document.getElementById('order-details-client');
+  const orderDetailsCpf = document.getElementById('order-details-cpf');
+  const orderDetailsPhone = document.getElementById('order-details-phone');
+  const orderDetailsProduct = document.getElementById('order-details-product');
+  const orderDetailsFormat = document.getElementById('order-details-format');
+  const orderDetailsPaper = document.getElementById('order-details-paper');
+  const orderDetailsQuantity = document.getElementById('order-details-quantity');
+  const orderDetailsArt = document.getElementById('order-details-art');
+  const orderDetailsFile = document.getElementById('order-details-file');
+  const orderDetailsRefs = document.getElementById('order-details-refs');
+  const orderDetailsArtFile = document.getElementById('order-details-art-file');
+  const orderDetailsPayment = document.getElementById('order-details-payment');
+  const orderDetailsTotal = document.getElementById('order-details-total');
+  const orderDetailsStatus = document.getElementById('order-details-status');
+  const orderDetailsDate = document.getElementById('order-details-date');
+  const artOrderLabel = document.getElementById('art-order-label');
+  const artResponsavel = document.getElementById('art-responsavel');
+  const artFileInput = document.getElementById('art-file');
+  const artNotes = document.getElementById('art-notes');
+  const artSave = document.getElementById('art-save');
+  const artSuccess = document.getElementById('art-success');
+  const artError = document.getElementById('art-error');
+  let statusOrderId = null;
+  let artOrderId = null;
+  const ordersCache = new Map();
+  const formatStatus = (status) => {
+    if (!status) {
+      return 'Aguardando';
+    }
+    const normalized = String(status).toLowerCase();
+    if (normalized === 'producao' || normalized === 'em producao') return 'Em producao';
+    if (normalized === 'pronto') return 'Pronto para retirada';
+    if (normalized === 'entregue') return 'Entregue';
+    if (normalized === 'cancelado') return 'Cancelado';
+    if (normalized.includes('arte')) return 'Aguardando confirmacao da arte';
+    return 'Aguardando confirmacao';
+  };
+
+  const normalizeStatus = (status) =>
+    String(status || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  const isProductionStatus = (status) => {
+    const normalized = normalizeStatus(status);
+    return normalized === 'producao' || normalized === 'em producao';
+  };
+
+  const fillOrderDetails = (orderId, order) => {
+    if (!order) {
+      return false;
+    }
+    if (orderDetailsId) {
+      orderDetailsId.textContent = orderId ? `Pedido: #${orderId}` : 'Pedido: -';
+    }
+    if (orderDetailsClient) {
+      orderDetailsClient.textContent = order.client_name || '-';
+    }
+    if (orderDetailsCpf) {
+      orderDetailsCpf.textContent = order.client_cpf || '-';
+    }
+    if (orderDetailsPhone) {
+      orderDetailsPhone.textContent = order.client_phone || '-';
+    }
+    if (orderDetailsProduct) {
+      orderDetailsProduct.textContent = order.product || '-';
+    }
+    if (orderDetailsFormat) {
+      orderDetailsFormat.textContent = order.format || '-';
+    }
+    if (orderDetailsPaper) {
+      orderDetailsPaper.textContent = order.paper || '-';
+    }
+    if (orderDetailsQuantity) {
+      orderDetailsQuantity.textContent = order.quantity ? String(order.quantity) : '-';
+    }
+    if (orderDetailsArt) {
+      orderDetailsArt.textContent = order.art_ready || '-';
+    }
+    if (orderDetailsFile) {
+      if (order.client_file) {
+        const fileName = order.client_file_name || 'arquivo';
+        orderDetailsFile.innerHTML = `<a href="${order.client_file}" download target="_blank" rel="noopener">Baixar ${fileName}</a>`;
+      } else {
+        orderDetailsFile.textContent = 'Nenhum arquivo enviado.';
+      }
+    }
+    if (orderDetailsRefs) {
+      if (order.client_refs) {
+        let refs = [];
+        let refsNames = [];
+        try {
+          refs = JSON.parse(order.client_refs);
+        } catch (error) {
+          refs = [];
+        }
+        try {
+          refsNames = JSON.parse(order.client_refs_names || '[]');
+        } catch (error) {
+          refsNames = [];
+        }
+        if (Array.isArray(refs) && refs.length) {
+          orderDetailsRefs.innerHTML = refs
+            .map((ref, index) => {
+              const refName = refsNames[index] || `Referencia ${index + 1}`;
+              return `<a href="${ref}" download target="_blank" rel="noopener">${refName}</a>`;
+            })
+            .join(' ');
+        } else {
+          orderDetailsRefs.textContent = 'Nenhuma referencia enviada.';
+        }
+      } else {
+        orderDetailsRefs.textContent = 'Nenhuma referencia enviada.';
+      }
+    }
+    if (orderDetailsArtFile) {
+      if (order.art_file) {
+        const artName = order.art_file_name || 'arte';
+        orderDetailsArtFile.innerHTML = `<a href="${order.art_file}" download target="_blank" rel="noopener">Baixar ${artName}</a>`;
+      } else {
+        orderDetailsArtFile.textContent = 'Nenhuma arte anexada.';
+      }
+    }
+    if (orderDetailsPayment) {
+      orderDetailsPayment.textContent = order.payment || '-';
+    }
+    if (orderDetailsTotal) {
+      const totalValue = Number(order.total);
+      orderDetailsTotal.textContent =
+        Number.isFinite(totalValue) && totalValue > 0
+          ? currencyFormatter.format(totalValue)
+          : '-';
+    }
+    if (orderDetailsStatus) {
+      orderDetailsStatus.textContent = formatStatus(order.status);
+    }
+    if (orderDetailsDate) {
+      const createdAt = order.created_at ? new Date(order.created_at) : null;
+      orderDetailsDate.textContent = createdAt ? createdAt.toLocaleString('pt-BR') : '-';
+    }
+    return true;
+  };
+
+  const renderOrders = (orders) => {
+    if (!ordersList) {
+      return;
+    }
+    if (!Array.isArray(orders) || orders.length === 0) {
+      ordersList.innerHTML = `
+        <div class="step">
+          <strong>Nenhum pedido ainda.</strong>
+          <span>Os pedidos feitos no autoatendimento aparecem aqui.</span>
+        </div>
+      `;
+      return;
+    }
+      ordersList.innerHTML = orders
+        .map((order) => {
+          const orderId = order.id ? `#${order.id}` : '';
+          const clientName = order.client_name || 'Cliente';
+          const product = order.product || 'Produto';
+          const statusLabel = formatStatus(order.status);
+          const cardClass = statusCardClass(order.status);
+          const accent = statusCardAccent(order.status);
+          const shadow = statusCardShadow(order.status);
+          const tint = statusCardTint(order.status);
+          const cardStyle = `--order-accent: ${accent}; --order-accent-shadow: ${shadow}; --order-accent-tint: ${tint};`;
+          return `
+            <div class="step order-card ${cardClass}" data-order-id="${order.id || ''}" style="${cardStyle}">
+              <strong>Pedido ${orderId}</strong>
+              <span>Cliente: ${clientName} | Produto: ${product} | Status: ${statusLabel}</span>
+              <div class="status-actions">
+              <button class="cta secondary" type="button" data-order-details>Ver detalhes</button>
+              <button class="cta secondary" type="button" data-modal-open="modal-art-upload" data-order-id="${order.id || ''}">
+                Anexar arte
+              </button>
+              <button class="cta secondary" type="button" data-modal-open="modal-status-update" data-order-id="${order.id || ''}">
+                Atualizar status
+              </button>
+              <button class="cta secondary" type="button" data-modal-open="modal-notify">Enviar aviso</button>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  };
+
+    const loadOrders = async () => {
+    if (!ordersList) {
+      return;
+    }
+    try {
+      const response = await fetch('api/orders_list.php', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Erro ao buscar pedidos.');
+      }
+      const data = await response.json();
+      ordersCache.clear();
+      if (Array.isArray(data)) {
+        data.forEach((order) => {
+          if (order && order.id) {
+            ordersCache.set(Number(order.id), order);
+          }
+        });
+      }
+      renderOrders(data);
+    } catch (error) {
+      ordersList.innerHTML = `
+        <div class="step">
+          <strong>Falha ao carregar pedidos.</strong>
+          <span>Verifique a API e o banco de dados.</span>
+        </div>
+      `;
+    }
+  };
+
+  loadOrders();
+
+  if (ordersList && orderDetailsModal) {
+    ordersList.addEventListener('click', (event) => {
+      const actionButton = event.target.closest('button');
+      const wantsDetails = actionButton && actionButton.hasAttribute('data-order-details');
+      if (actionButton && !wantsDetails) {
+        return;
+      }
+      const step = event.target.closest('.step');
+      if (!step) {
+        return;
+      }
+      const orderIdRaw = step.getAttribute('data-order-id');
+      const orderId = orderIdRaw ? Number(orderIdRaw) : null;
+      const order = orderId ? ordersCache.get(orderId) : null;
+      if (!fillOrderDetails(orderId, order)) {
+        return;
+      }
+      openInfoModal(orderDetailsModal);
+    });
+  }
+
+  const statusDotClass = (status) => {
+    if (!status) return 'status-dot--blue';
+    const normalized = normalizeStatus(status);
+    if (normalized === 'producao' || normalized === 'em producao') return 'status-dot--yellow';
+    if (normalized === 'pronto') return 'status-dot--green';
+    if (normalized === 'entregue') return 'status-dot--green';
+    if (normalized === 'cancelado') return 'status-dot--red';
+    if (normalized.includes('arte')) return 'status-dot--red';
+    return 'status-dot--blue';
+  };
+
+  const statusCardClass = (status) => {
+    if (!status) return 'order-card--blue';
+    const normalized = normalizeStatus(status);
+    if (normalized === 'producao' || normalized === 'em producao') return 'order-card--yellow';
+    if (normalized === 'pronto') return 'order-card--green';
+    if (normalized === 'entregue') return 'order-card--green';
+    if (normalized === 'cancelado') return 'order-card--red';
+    if (normalized.includes('arte')) return 'order-card--red';
+    return 'order-card--blue';
+  };
+
+  const statusCardAccent = (status) => {
+    const normalized = normalizeStatus(status);
+    if (normalized === 'producao' || normalized === 'em producao') return '#f8d23c';
+    if (normalized === 'pronto' || normalized === 'entregue') return '#2fd46c';
+    if (normalized === 'cancelado' || normalized.includes('arte')) return '#e10600';
+    return '#4aa3ff';
+  };
+
+  const statusCardShadow = (status) => {
+    const normalized = normalizeStatus(status);
+    if (normalized === 'producao' || normalized === 'em producao') return 'rgba(248, 210, 60, 0.25)';
+    if (normalized === 'pronto' || normalized === 'entregue') return 'rgba(47, 212, 108, 0.25)';
+    if (normalized === 'cancelado' || normalized.includes('arte')) return 'rgba(225, 6, 0, 0.25)';
+    return 'rgba(74, 163, 255, 0.25)';
+  };
+
+  const statusCardTint = (status) => {
+    const normalized = normalizeStatus(status);
+    if (normalized === 'producao' || normalized === 'em producao') return 'rgba(248, 210, 60, 0.12)';
+    if (normalized === 'pronto' || normalized === 'entregue') return 'rgba(47, 212, 108, 0.12)';
+    if (normalized === 'cancelado' || normalized.includes('arte')) return 'rgba(225, 6, 0, 0.12)';
+    return 'rgba(74, 163, 255, 0.12)';
+  };
+
+  const renderClientOrders = (orders) => {
+    if (!clientOrdersList) {
+      return;
+    }
+    if (!Array.isArray(orders) || orders.length === 0) {
+      clientOrdersList.innerHTML = `
+        <div class="status-line status-line--boxed">
+          <span class="status-dot status-dot--blue"></span>
+          <strong>Nenhum pedido ainda.</strong>
+        </div>
+      `;
+      return;
+    }
+    clientOrdersList.innerHTML = orders
+      .map((order) => {
+        const orderId = order.id ? `#${order.id}` : '';
+        const statusLabel = formatStatus(order.status);
+        const dotClass = statusDotClass(order.status);
+        const cancelMarkup = isProductionStatus(order.status)
+          ? '<span class="cta secondary is-disabled" aria-disabled="true">Cancelamento indisponivel</span>'
+          : `<a class="cta secondary order-cancel" href="api/orders_cancel.php?order_id=${order.id || 0}" data-order="${order.id || ''}" role="button">
+                  Cancelar
+                </a>`;
+        return `
+          <div class="status-line status-line--boxed" data-status="${order.status || ''}">
+            <span class="status-dot ${dotClass}"></span>
+            <strong>Pedido ${orderId}</strong> - ${statusLabel}.
+            <div class="order-menu">
+              <button class="order-menu__toggle" type="button" aria-label="Mais opcoes">...</button>
+              <div class="order-menu__panel">
+                ${cancelMarkup}
+                <button class="cta secondary order-edit" type="button" data-order="${order.id || ''}">Editar pedido</button>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  };
+
+  const loadClientOrders = async () => {
+    if (!clientOrdersList) {
+      return;
+    }
+    try {
+      const response = await fetch('api/orders_list.php', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Erro ao buscar pedidos.');
+      }
+      const data = await response.json();
+      renderClientOrders(data);
+    } catch (error) {
+      clientOrdersList.innerHTML = `
+        <div class="status-line status-line--boxed">
+          <span class="status-dot status-dot--red"></span>
+          <strong>Falha ao carregar pedidos.</strong>
+        </div>
+      `;
+    }
+  };
+
+  loadClientOrders();
+
+  const cancelClientOrderRequest = (orderId) => {
+    if (!orderId) {
+      return false;
+    }
+    if (clientCancelError) {
+      clientCancelError.hidden = true;
+      clientCancelError.textContent = '';
+    }
+    const confirmed = window.confirm(`Deseja cancelar o Pedido #${orderId}?`);
+    if (!confirmed) {
+      return false;
+    }
+    fetch('api/orders_cancel.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ order_id: orderId }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          let message = 'Erro ao cancelar.';
+          try {
+            const data = await response.json();
+            if (data && data.error) {
+              message = data.error;
+            }
+          } catch (error) {
+            // ignore parsing errors
+          }
+          throw new Error(message);
+        }
+        return response.json();
+      })
+      .then(() => {
+        loadClientOrders();
+        loadOrders();
+      })
+      .catch((error) => {
+        if (clientCancelError) {
+          clientCancelError.textContent = error.message || 'Nao foi possivel cancelar.';
+          clientCancelError.hidden = false;
+        } else {
+          window.alert(error.message || 'Nao foi possivel cancelar.');
+        }
+      });
+    return false;
+  };
+
+  window.cancelClientOrder = cancelClientOrderRequest;
+
+  if (clientOrdersList) {
+    clientOrdersList.addEventListener('click', (event) => {
+      const toggle = event.target.closest('.order-menu__toggle');
+      if (toggle) {
+        event.stopPropagation();
+        const menu = toggle.closest('.order-menu');
+        if (!menu) {
+          return;
+        }
+        if (openOrderMenu && openOrderMenu !== menu) {
+          openOrderMenu.classList.remove('is-open');
+        }
+        const willOpen = openOrderMenu !== menu;
+        menu.classList.toggle('is-open', willOpen);
+        openOrderMenu = willOpen ? menu : null;
+        return;
+      }
+
+      const cancelButton = event.target.closest('.order-cancel');
+      if (cancelButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const container = cancelButton.closest('[data-status]');
+        const status = container ? container.dataset.status : null;
+        if (status === 'producao') {
+          return;
+        }
+        const orderId = Number(cancelButton.dataset.order) || null;
+        const confirmed = window.confirm(`Deseja cancelar o Pedido #${orderId}?`);
+        if (!confirmed || !orderId) {
+          return;
+        }
+        fetch('api/orders_cancel.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ order_id: orderId }),
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              let message = 'Erro ao cancelar.';
+              try {
+                const data = await response.json();
+                if (data && data.error) {
+                  message = data.error;
+                }
+              } catch (error) {
+                // ignore parsing errors
+              }
+              throw new Error(message);
+            }
+            return response.json();
+          })
+          .then(() => {
+            loadClientOrders();
+            loadOrders();
+          })
+          .catch((error) => {
+            window.alert(error.message || 'Nao foi possivel cancelar.');
+          });
+        return;
+      }
+
+      const editButton = event.target.closest('.order-edit');
+      if (editButton) {
+        event.stopPropagation();
+        const orderId = editButton.dataset.order || 'pedido';
+        window.alert(`Editar ${orderId} (em breve).`);
+      }
+    });
+  }
+
+  if (statusSave) {
+    statusSave.addEventListener('click', () => {
+      if (!statusOrderId || !statusSelect) {
+        return;
+      }
+      if (statusSuccess) {
+        statusSuccess.hidden = true;
+      }
+      if (statusError) {
+        statusError.hidden = true;
+      }
+      fetch('api/orders_update_status.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          order_id: statusOrderId,
+          status: statusSelect.value,
+          responsavel: statusResponsavel ? statusResponsavel.value.trim() : '',
+          notes: statusNotes ? statusNotes.value.trim() : '',
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Erro ao atualizar.');
+          }
+          return response.json();
+        })
+        .then(() => {
+          if (statusSuccess) {
+            statusSuccess.hidden = false;
+          }
+          loadOrders();
+          loadClientOrders();
+        })
+        .catch(() => {
+          if (statusError) {
+            statusError.hidden = false;
+          }
+        });
+    });
+  }
+
+  if (artSave) {
+    artSave.addEventListener('click', () => {
+      if (!artOrderId) {
+        return;
+      }
+      if (artSuccess) {
+        artSuccess.hidden = true;
+      }
+      if (artError) {
+        artError.hidden = true;
+      }
+      const payload = new FormData();
+      payload.append('order_id', String(artOrderId));
+      payload.append('responsavel', artResponsavel ? artResponsavel.value.trim() : '');
+      payload.append('notes', artNotes ? artNotes.value.trim() : '');
+      if (artFileInput && artFileInput.files && artFileInput.files[0]) {
+        payload.append('art_file', artFileInput.files[0]);
+      }
+      fetch('api/orders_upload_art.php', {
+        method: 'POST',
+        body: payload,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Erro ao anexar.');
+          }
+          return response.json();
+        })
+        .then(() => {
+          if (artSuccess) {
+            artSuccess.hidden = false;
+          }
+          loadOrders();
+          loadClientOrders();
+        })
+        .catch(() => {
+          if (artError) {
+            artError.hidden = false;
+          }
+        });
+    });
+  }
+
+
+  document.addEventListener('click', (event) => {
+    const statusButton = event.target.closest('[data-modal-open="modal-status-update"]');
+    if (!statusButton) {
+      return;
+    }
+    const orderId = statusButton.getAttribute('data-order-id');
+    statusOrderId = orderId ? Number(orderId) : null;
+    if (statusOrderLabel) {
+      statusOrderLabel.textContent = statusOrderId ? `Pedido: #${statusOrderId}` : 'Pedido: -';
+    }
+    if (statusSuccess) {
+      statusSuccess.hidden = true;
+    }
+    if (statusError) {
+      statusError.hidden = true;
+    }
+  });
+
 })();
 

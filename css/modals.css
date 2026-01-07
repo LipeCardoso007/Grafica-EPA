@@ -19,11 +19,11 @@
 
 .modal__panel {
   position: relative;
-  width: min(560px, 92vw);
+  width: min(35rem, 92vw);
   max-height: 90vh;
   background: var(--card);
-  border: 1px solid var(--stroke);
-  border-radius: 24px;
+  border: 0.0625rem solid var(--stroke);
+  border-radius: 1.5rem;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
@@ -34,20 +34,20 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 18px;
-  border-bottom: 1px solid var(--stroke);
+  gap: 0.75rem;
+  padding: 1.125rem;
+  border-bottom: 0.0625rem solid var(--stroke);
 }
 
 .modal__eyebrow {
   text-transform: uppercase;
-  letter-spacing: 1.6px;
+  letter-spacing: 0.1rem;
   font-size: 0.75rem;
   color: var(--muted);
 }
 
 .modal__header h2 {
-  margin: 6px 0 6px;
+  margin: 0.375rem 0 0.375rem;
   font-size: 1.4rem;
 }
 
@@ -58,11 +58,11 @@
 }
 
 .progress {
-  margin-top: 10px;
+  margin-top: 0.625rem;
   width: 100%;
-  height: 6px;
+  height: 0.375rem;
   background: #0e0e0e;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   overflow: hidden;
 }
 
@@ -84,15 +84,15 @@
 }
 
 .modal__body {
-  padding: 18px;
+  padding: 1.125rem;
   display: grid;
-  gap: 16px;
+  gap: 1rem;
   overflow-y: auto;
 }
 
 .step-panel {
   display: none;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .step-panel.is-active {
@@ -101,7 +101,7 @@
 
 .modal__footer {
   display: flex;
-  gap: 10px;
-  padding: 16px 18px 20px;
-  border-top: 1px solid var(--stroke);
+  gap: 0.625rem;
+  padding: 1rem 1.125rem 1.25rem;
+  border-top: 0.0625rem solid var(--stroke);
 }
